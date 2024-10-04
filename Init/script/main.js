@@ -34,12 +34,11 @@ function MainGame()
 
 
 
-
-
-		for(var i=0;i<Math.floor(g.game.localRandom.generate()*10)+1;i++)
+		let nowpoint=point;
+		let random=Math.floor(g.game.localRandom.generate()*10)+1;
+		let targetcount=Math.floor(g.game.localRandom.generate()*random);
+		for(let i=0;i<targetcount;i++)
 		{
-			if(Math.floor(g.game.localRandom.generate()*2)==0)
-			{
 			let target = new g.FilledRect({
 				scene: scene,
 				width: 50,
@@ -52,13 +51,16 @@ function MainGame()
 			target.onPointDown.add(function () 
 			{
 				point+=1;
-				label.text=String(point)
+				label.text=String(point);
 				scene.remove(target);
 				label.invalidate();
 			});
 			scene.append(target);
-			}else
-			{
+
+
+		}
+		for(let i=0;i<random-targetcount;i++)
+		{
 			let bom= new g.Sprite({
 				scene: scene,
 				src: bomImage,
@@ -77,9 +79,17 @@ function MainGame()
 					g.game.replaceScene(GameOver());
 				})
 				scene.append(bom);
-			}
 		}
-        // ここまでゲーム内容を記述します
+		setTimeout(function()
+		{
+			if(point==(nowpoint+targetcount))
+			{
+				g.game.replaceScene(MainGame());
+			}else
+			{
+				g.game.replaceScene(GameOver());
+			}
+		},targetcount*1000);
     });
 	return scene;
 }
