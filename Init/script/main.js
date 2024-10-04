@@ -1,6 +1,11 @@
 var point=0;
 function main(param) {
-    var scene = new g.Scene({
+	g.game.pushScene(MainGame());
+}
+
+function MainGame()
+{
+	const scene = new g.Scene({
         game: g.game,
         assetIds: ["bom"]
     });
@@ -16,7 +21,7 @@ function main(param) {
 			fontFamily: g.FontFamily.SansSerif,
 			size: 15
 		  });
-		  var label = new g.Label({
+		  let label = new g.Label({
 			scene: scene,
 			font: font,
 			text: String(point),
@@ -33,46 +38,94 @@ function main(param) {
 
 		for(var i=0;i<Math.floor(g.game.localRandom.generate()*10)+1;i++)
 		{
-        let target = new g.FilledRect({
-            scene: scene,
-            width: 50,
-            height: 50,
-			x:Math.floor(g.game.localRandom.generate()*(g.game.width-50)),
-			y:Math.floor(g.game.localRandom.generate()*(g.game.height-50)),
-			cssColor:"red",
-			touchable:true
-        });
+			if(Math.floor(g.game.localRandom.generate()*2)==0)
+			{
+			let target = new g.FilledRect({
+				scene: scene,
+				width: 50,
+				height: 50,
+				x:Math.floor(g.game.localRandom.generate()*(g.game.width-50)),
+				y:Math.floor(g.game.localRandom.generate()*(g.game.height-50)),
+				cssColor:"red",
+				touchable:true
+			});
+			target.onPointDown.add(function () 
+			{
+				point+=1;
+				label.text=String(point)
+				scene.remove(target);
+				label.invalidate();
+			});
+			scene.append(target);
+			}else
+			{
+			let bom= new g.Sprite({
+				scene: scene,
+				src: bomImage,
+				width: 800,
+				height: 800,
+				scaleX:0.2,
+				scaleY:0.2,
+				x:Math.floor(g.game.localRandom.generate()*(g.game.width-50)),
+				y:Math.floor(g.game.localRandom.generate()*(g.game.height-50)),
+				touchable:true
+				});
 
-		let bom= new g.Sprite({
-            scene: scene,
-            src: bomImage,
-            width: 800,
-            height: 800,
-			scaleX:0.2,
-			scaleY:0.2,
-			x:Math.floor(g.game.localRandom.generate()*(g.game.width-50)),
-			y:Math.floor(g.game.localRandom.generate()*(g.game.height-50)),
-			touchable:true
-        });
-
-        target.onPointDown.add(function () {
-			point+=1;
-			label.text=String(point)
-			scene.remove(target);
-			label.invalidate();
-        });
-
-		bom.onPointDown.add(()=>
-		{
-			point-=1
-			scene.remove(bom);
-		})
-		scene.append(bom);
-		scene.append(target);
-	}
+				bom.onPointDown.add(()=>
+				{
+					scene.remove(bom);
+					g.game.replaceScene(GameOver());
+				})
+				scene.append(bom);
+			}
+		}
         // ここまでゲーム内容を記述します
     });
-    g.game.pushScene(scene);
+	return scene;
+}
+
+
+function GameOver()
+{
+	const scene=new g.Scene({
+        game: g.game,
+    });
+
+	scene.onLoad.add(function () {
+		var font = new g.DynamicFont({
+			game: g.game,
+			fontFamily: g.FontFamily.SansSerif,
+			size: 50
+		  });
+		  let label = new g.Label({
+			scene: scene,
+			font: font,
+			text: "GAME OVER",
+			fontSize: 50,
+			textColor: "red",
+			x: 1280/2,
+			y: 720/2
+		  });
+
+		  let score = new g.Label({
+			scene: scene,
+			font: font,
+			text: "スコア"+point,
+			fontSize: 50,
+			textColor: "blue",
+			x: 1280/2+50,
+			y: 720/2+50
+		  });
+		  point=0;
+		  
+		  scene.append(score);
+		  scene.append(label);
+
+		  scene.onPointDownCapture.add(function(){
+			g.game.replaceScene(MainGame());
+		  });
+	})
+	  return scene;
 }
 
 module.exports = main;
